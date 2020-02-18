@@ -53,7 +53,7 @@ export class Bundle {
 
     this.blobSize += length
     this.index[makeRelative(this.cwd, absoluteFileName)] = [start, length]
-    this.buffers.push(content ? Buffer.from(content) :  fs.readFile(absoluteFileName))
+    this.buffers.push(content ? Buffer.from(content as any) :  fs.readFile(absoluteFileName))
   }
 
   getEncryptedBlobSize() {
@@ -68,7 +68,7 @@ export class Bundle {
     let encBuffer = Buffer.concat(this.buffers)
     const key = new Buffer([0x01, 0xde, 0x60, 0x7f, 0xd2, 0xcc, 0xfd, 0x1a, 0x8b, 0x8f, 0x33, 0x05, 0x4a, 0x8b, 0x74, 0xbf, 0x2d, 0xed, 0x81, 0x24, 0xd3, 0x85, 0xd3, 0xbf, 0x04, 0xf1, 0x01, 0xaf, 0x3f, 0x10, 0xbb, 0xd1]);
     const iv = crypto.randomBytes(16);
-    const ciph = crypto.createDecipheriv('aes-256-cbc', key, iv)
+    const ciph = crypto.createCipheriv('aes-256-cbc', key, iv)
     encBuffer = ciph.update(encBuffer);
 
     return toStream(encBuffer)
