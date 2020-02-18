@@ -198,6 +198,7 @@ function shimFs(binary: NexeBinary, fs: any = require('fs')) {
       callback = typeof options === 'function' ? options : callback
 
       //TODO: Here all needs to be
+      console.log("readFile", filepath, options, resourceWindow.slice(offset, length))
       return callback(null, resourceWindow.slice(offset, length))
       originalFsMethods.open(blobPath, 'r', function(err: Error, fd: number) {
         if (err) return callback(err, null)
