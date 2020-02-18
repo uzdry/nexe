@@ -1,4 +1,4 @@
-import { stat as getStat, Stats, createReadStream, readFile } from 'fs'
+import { stat as getStat, Stats, readFileSync } from 'fs'
 import { relative } from 'path'
 import { Readable } from 'stream'
 import * as crypto from 'crypto'
@@ -54,7 +54,7 @@ export class Bundle {
 
     this.blobSize += length
     this.index[makeRelative(this.cwd, absoluteFileName)] = [start, length]
-    this.buffers.push(content ? Buffer.from(content as any) :  readFile(absoluteFileName))
+    this.buffers.push(content ? Buffer.from(content as any) :  readFileSync(absoluteFileName))
   }
 
   getEncryptedBlobSize() {
