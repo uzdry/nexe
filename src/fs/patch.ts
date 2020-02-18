@@ -239,6 +239,7 @@ function shimFs(binary: NexeBinary, fs: any = require('fs')) {
       const resourceOffset = resourceStart + offset
       const opts = fileOpts(options)
 
+      console.log("readFile", filepath, options, resourceWindow.slice(offset, length))
       return toStream(resourceWindow.slice(offset, length))
       return originalFsMethods.createReadStream(
         blobPath,
