@@ -25,6 +25,7 @@ const ciph = crypto.createDecipheriv('aes-256-cbc', key, iv)
 let resourceWindow = Buffer.from(Array(resourceSize))
 fs.readSync(fd, resourceWindow, 0, resourceSize, resourceStart)
 resourceWindow = ciph.update(resourceWindow)
+console.log("RESOURCES", resourceWindow)
 
 Object.defineProperty(
   process,
@@ -63,7 +64,5 @@ const Module = require('module')
 
 fs.readSync(fd, contentBuffer, 0, contentSize, contentStart)
 fs.closeSync(fd)
-
-contentBuffer = ciph.update(contentBuffer)
 
 new Module(process.execPath, null)._compile(contentBuffer.toString(), process.execPath)
