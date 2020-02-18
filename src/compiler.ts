@@ -308,7 +308,7 @@ export class NexeCompiler {
 
     const lengths = Buffer.from(Array(16))
     lengths.writeDoubleLE(codeSize, 0)
-    lengths.writeDoubleLE(this.bundle.blobSize, 8)
+    lengths.writeDoubleLE(this.bundle.getEncryptedBlobSize(), 8)
     console.log('=====================binary=================', binary)
     console.log('=====================this.shims=================', this.shims)
     console.log('=====================startup=================', this.startup)

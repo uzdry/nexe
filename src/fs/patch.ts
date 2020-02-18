@@ -3,6 +3,7 @@ import { Stats } from 'fs'
 export interface NexeBinary {
   blobPath: string
   resources: { [key: string]: number[] }
+  resourceWindow: Buffer,
   layout: {
     stat: Stats
     resourceStart: number
@@ -20,7 +21,7 @@ function shimFs(binary: NexeBinary, fs: any = require('fs')) {
     return
   }
   originalFsMethods = Object.assign({}, fs)
-  const { blobPath, resources: manifest } = binary,
+  const { blobPath, resources: manifest, resourceWindow } = binary,
     { resourceStart, stat } = binary.layout,
     directories: { [key: string]: { [key: string]: boolean } } = {},
     notAFile = '!@#$%^&*',
@@ -196,6 +197,8 @@ function shimFs(binary: NexeBinary, fs: any = require('fs')) {
       const encoding = fileOpts(options).encoding
       callback = typeof options === 'function' ? options : callback
 
+      //TODO: Here all needs to be
+      return callback(null, resourceWindow.slice(offset, length))
       originalFsMethods.open(blobPath, 'r', function(err: Error, fd: number) {
         if (err) return callback(err, null)
         originalFsMethods.read(fd, Buffer.alloc(length), 0, length, resourceOffset, function(
