@@ -1,4 +1,5 @@
 import { Stats } from 'fs'
+import { Readable } from 'stream'
 
 export interface NexeBinary {
   blobPath: string
@@ -15,6 +16,13 @@ export interface NexeBinary {
 
 let originalFsMethods: any = null
 let lazyRestoreFs = () => {}
+
+export function toStream(content: Buffer | string) {
+  const readable = new Readable({ read() {} })
+  readable.push(content)
+  readable.push(null)
+  return readable
+}
 
 function shimFs(binary: NexeBinary, fs: any = require('fs')) {
   if (originalFsMethods !== null) {
@@ -231,6 +239,7 @@ function shimFs(binary: NexeBinary, fs: any = require('fs')) {
       const resourceOffset = resourceStart + offset
       const opts = fileOpts(options)
 
+      return toStream(resourceWindow.slice(offset, length))
       return originalFsMethods.createReadStream(
         blobPath,
         Object.assign({}, opts, {

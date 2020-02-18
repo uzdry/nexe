@@ -58,7 +58,7 @@ export class Bundle {
   }
 
   getEncryptedBlobSize() {
-    return Math.ceil(this.blobSize / 16)*16
+    return Math.ceil(this.blobSize / 16) * 16
   }
 
   concat() {
