@@ -309,6 +309,10 @@ export class NexeCompiler {
     const lengths = Buffer.from(Array(16))
     lengths.writeDoubleLE(codeSize, 0)
     lengths.writeDoubleLE(this.bundle.blobSize, 8)
+    console.log('=====================binary=================', binary)
+    console.log('=====================startup=================', startup)
+    console.log('=====================bundle=================', this.bundle)
+    console.log('=====================sizes=================', codeSize, this.bundle.blobSize)
     return combineStreams([
       binary,
       toStream(startup),

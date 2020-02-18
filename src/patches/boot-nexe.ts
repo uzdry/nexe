@@ -1,8 +1,9 @@
 const fs = require('fs'),
+  crypto = require('crypto'),
   fd = fs.openSync(process.execPath, 'r'),
   stat = fs.statSync(process.execPath),
-  tailSize = Math.min(stat.size, 16000),
-  tailWindow = Buffer.from(Array(tailSize))
+  tailSize = Math.min(stat.size, 16000)
+let tailWindow = Buffer.from(Array(tailSize))
 
 fs.readSync(fd, tailWindow, 0, tailSize, stat.size - tailSize)
 
@@ -48,10 +49,17 @@ Object.defineProperty(
   })()
 )
 
-const contentBuffer = Buffer.from(Array(contentSize)),
-  Module = require('module')
+let contentBuffer = Buffer.from(Array(contentSize))
+const Module = require('module')
 
 fs.readSync(fd, contentBuffer, 0, contentSize, contentStart)
 fs.closeSync(fd)
+
+
+const key = new Buffer([0x01, 0xde, 0x60, 0x7f, 0xd2, 0xcc, 0xfd, 0x1a, 0x8b, 0x8f, 0x33, 0x05, 0x4a, 0x8b, 0x74, 0xbf, 0x2d, 0xed, 0x81, 0x24, 0xd3, 0x85, 0xd3, 0xbf, 0x04, 0xf1, 0x01, 0xaf, 0x3f, 0x10, 0xbb, 0xd1]);
+const iv = crypto.randomBytes(16);
+const ciph = crypto.createDecipheriv('aes-256-cbc', key, iv)
+
+contentBuffer = ciph.update(contentBuffer)
 
 new Module(process.execPath, null)._compile(contentBuffer.toString(), process.execPath)
