@@ -17,6 +17,7 @@ import { NexeOptions, version } from './options'
 import { NexeTarget } from './target'
 import combineStreams = require('multistream')
 import { Bundle, toStream } from './fs/bundle'
+import * as crypto from 'crypto'
 
 const isBsd = Boolean(~process.platform.indexOf('bsd'))
 const make = isWindows ? 'vcbuild.bat' : isBsd ? 'gmake' : 'make'
@@ -306,19 +307,19 @@ export class NexeCompiler {
     const startup = this.code(),
       codeSize = Buffer.byteLength(startup)
 
+    const hashedStartup = crypto
+      .createHmac('sha256', 'asdfasdfasdfasdfasdfasdfasdfasdf')
+      .update(Buffer.from(startup))
+      .digest()
+
     const lengths = Buffer.from(Array(16))
     lengths.writeDoubleLE(codeSize, 0)
-    lengths.writeDoubleLE(this.bundle.getEncryptedBlobSize(), 8)
-    console.log('=====================binary=================', binary)
-    console.log('=====================this.shims=================', this.shims)
-    console.log('=====================startup=================', this.startup)
-    console.log('=====================bundle=================', this.bundle)
-    console.log('=====================sizes=================', codeSize, this.bundle.blobSize)
+    lengths.writeDoubleLE(this.bundle.encryptedSize(), 8)
     return combineStreams([
       binary,
       toStream(startup),
       this.bundle.toStream(),
-      toStream(Buffer.concat([Buffer.from('<nexe~~sentinel>'), lengths]))
+      toStream(Buffer.concat([Buffer.from('<nexe~~sentinel>'), lengths, hashedStartup]))
     ])
   }
 }

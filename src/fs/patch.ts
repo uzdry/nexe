@@ -4,7 +4,7 @@ import { Readable } from 'stream'
 export interface NexeBinary {
   blobPath: string
   resources: { [key: string]: number[] }
-  resourceWindow: Buffer,
+  resourceWindow: Buffer
   layout: {
     stat: Stats
     resourceStart: number
@@ -17,7 +17,7 @@ export interface NexeBinary {
 let originalFsMethods: any = null
 let lazyRestoreFs = () => {}
 
-export function toStream(content: Buffer | string) {
+function toStream(content: Buffer | string) {
   const readable = new Readable({ read() {} })
   readable.push(content)
   readable.push(null)
@@ -29,8 +29,8 @@ function shimFs(binary: NexeBinary, fs: any = require('fs')) {
     return
   }
   originalFsMethods = Object.assign({}, fs)
-  const { blobPath, resources: manifest, resourceWindow } = binary,
-    { resourceStart, stat } = binary.layout,
+  const { resources: manifest } = binary,
+    { stat } = binary.layout,
     directories: { [key: string]: { [key: string]: boolean } } = {},
     notAFile = '!@#$%^&*',
     isWin = process.platform.startsWith('win'),
@@ -201,33 +201,8 @@ function shimFs(binary: NexeBinary, fs: any = require('fs')) {
         return originalFsMethods.readFile.apply(fs, arguments)
       }
       const [offset, length] = entry
-      const resourceOffset = resourceStart + offset
-      const encoding = fileOpts(options).encoding
-      callback = typeof options === 'function' ? options : callback
 
-      //TODO: Here all needs to be
-      console.log("readFile", filepath, options, resourceWindow.slice(offset, length))
-      return callback(null, resourceWindow.slice(offset, length))
-      originalFsMethods.open(blobPath, 'r', function(err: Error, fd: number) {
-        if (err) return callback(err, null)
-        originalFsMethods.read(fd, Buffer.alloc(length), 0, length, resourceOffset, function(
-          error: Error,
-          bytesRead: number,
-          result: Buffer
-        ) {
-          if (error) {
-            return originalFsMethods.close(fd, function() {
-              callback(error, null)
-            })
-          }
-          originalFsMethods.close(fd, function(err: Error) {
-            if (err) {
-              return callback(err, result)
-            }
-            callback(err, encoding ? result.toString(encoding) : result)
-          })
-        })
-      })
+      return binary.resourceWindow.slice(offset, offset + length)
     },
     createReadStream: function createReadStream(filepath: any, options: any) {
       setupManifest()
@@ -236,18 +211,8 @@ function shimFs(binary: NexeBinary, fs: any = require('fs')) {
         return originalFsMethods.createReadStream.apply(fs, arguments)
       }
       const [offset, length] = entry
-      const resourceOffset = resourceStart + offset
-      const opts = fileOpts(options)
 
-      console.log("readFile", filepath, options, resourceWindow.slice(offset, length))
-      return toStream(resourceWindow.slice(offset, length))
-      return originalFsMethods.createReadStream(
-        blobPath,
-        Object.assign({}, opts, {
-          start: resourceOffset,
-          end: resourceOffset + length - 1
-        })
-      )
+      return toStream(binary.resourceWindow.slice(offset, offset + length))
     },
     readFileSync: function readFileSync(filepath: any, options: any) {
       setupManifest()
@@ -256,13 +221,7 @@ function shimFs(binary: NexeBinary, fs: any = require('fs')) {
         return originalFsMethods.readFileSync.apply(fs, arguments)
       }
       const [offset, length] = entry
-      const resourceOffset = resourceStart + offset
-      const encoding = fileOpts(options).encoding
-      const fd = originalFsMethods.openSync(process.execPath, 'r')
-      const result = Buffer.alloc(length)
-      originalFsMethods.readSync(fd, result, 0, length, resourceOffset)
-      originalFsMethods.closeSync(fd)
-      return encoding ? result.toString(encoding) : result
+      return binary.resourceWindow.slice(offset, offset + length).toString()
     },
     statSync: function statSync(filepath: string | Buffer) {
       const stat = ownStat(filepath)

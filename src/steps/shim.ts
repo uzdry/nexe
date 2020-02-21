@@ -2,7 +2,6 @@ import { NexeCompiler } from '../compiler'
 import { wrap } from '../util'
 
 export default function(compiler: NexeCompiler, next: () => Promise<void>) {
-  console.log("=================Compiler binary Config=================", compiler.binaryConfiguration)
   compiler.shims.push(
     wrap(
       `process.__nexe = ${JSON.stringify(compiler.binaryConfiguration)};\n` +

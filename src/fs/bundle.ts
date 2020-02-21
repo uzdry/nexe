@@ -20,7 +20,6 @@ export function toStream(content: Buffer | string) {
   return readable
 }
 
-
 export type File = { absPath: string; contents: string; deps: FileMap }
 export type FileMap = { [absPath: string]: File | null }
 
@@ -39,6 +38,7 @@ export class Bundle {
   cwd: string
   blobSize: number = 0
   index: { [relativeFilePath: string]: [number, number] } = {}
+  streams: (Readable | (() => Readable))[] = []
   buffers: Buffer[] = []
 
   async addResource(absoluteFileName: string, content?: Buffer | string) {
@@ -54,10 +54,10 @@ export class Bundle {
 
     this.blobSize += length
     this.index[makeRelative(this.cwd, absoluteFileName)] = [start, length]
-    this.buffers.push(content ? Buffer.from(content as any) :  readFileSync(absoluteFileName))
+    this.buffers.push(content ? Buffer.from(content) : readFileSync(absoluteFileName))
   }
 
-  getEncryptedBlobSize() {
+  encryptedSize() {
     return Math.ceil(this.blobSize / 16) * 16
   }
 
@@ -66,13 +66,12 @@ export class Bundle {
   }
 
   toStream() {
-    let encBuffer = Buffer.concat(this.buffers)
-    const key = new Buffer([0x01, 0xde, 0x60, 0x7f, 0xd2, 0xcc, 0xfd, 0x1a, 0x8b, 0x8f, 0x33, 0x05, 0x4a, 0x8b, 0x74, 0xbf, 0x2d, 0xed, 0x81, 0x24, 0xd3, 0x85, 0xd3, 0xbf, 0x04, 0xf1, 0x01, 0xaf, 0x3f, 0x10, 0xbb, 0xd1]);
-    const iv = crypto.randomBytes(16);
-    const ciph = crypto.createCipheriv('aes-256-cbc', key, iv)
-    encBuffer = ciph.update(encBuffer);
+    let iv = new Buffer('asdfasdfasdfasdf')
+    let key = new Buffer('asdfasdfasdfasdfasdfasdfasdfasdf')
+    let cipher = crypto.createCipheriv('aes-256-cbc', key, iv)
+    let encResource = Buffer.concat([cipher.update(Buffer.concat(this.buffers)), cipher.final()])
 
-    return toStream(encBuffer)
+    return toStream(encResource)
   }
 
   toJSON() {
