@@ -54,7 +54,7 @@ export class Bundle {
 
     this.blobSize += length
     this.index[makeRelative(this.cwd, absoluteFileName)] = [start, length]
-    this.buffers.push(content ? Buffer.from(content) : readFileSync(absoluteFileName))
+    this.buffers.push(content ? Buffer.from(content as Buffer) : readFileSync(absoluteFileName))
   }
 
   encryptedSize() {
