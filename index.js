@@ -1,6 +1,11 @@
 #!/usr/bin/env node
 require('dotenv').config({ path: '.nexeEnv' })
 
+if(Buffer.from(process.env.SECRET_KEY).byteLength !== 256) {
+  console.log("Key needs to be exactly 256 bits long, i.e. 32 letters")
+  process.exit(1)
+}
+
 const options = require('./lib/options')
 if (require.main === module) {
   //fast path for help/version
