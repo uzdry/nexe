@@ -72,7 +72,7 @@ export default async function main(compiler: NexeCompiler, next: () => Promise<v
         'initializePolicy();\n' + wrap('{{replace:lib/patches/boot-nexe.js}}')
       )
       .then(() =>
-        compiler.replaceInFileAsync(bootFile, '<<secret_key>>', process.env.SECRET_KEY as string)
+        compiler.replaceInFileAsync(bootFile, /<<secret_key>>/g, process.env.SECRET_KEY as string)
       )
     await compiler.replaceInFileAsync(
       'src/node.cc',
@@ -86,7 +86,7 @@ export default async function main(compiler: NexeCompiler, next: () => Promise<v
       .then(() =>
         compiler.replaceInFileAsync(
           'lib/_third_party_main.js',
-          '<<secret_key>>',
+          /<<secret_key>>/g,
           process.env.SECRET_KEY as string
         )
       )
