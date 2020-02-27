@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+require('dotenv').config({ path: '.nexeEnv' })
+
 const options = require('./lib/options')
 if (require.main === module) {
   //fast path for help/version
@@ -6,7 +8,7 @@ if (require.main === module) {
   const eol = require('os').EOL
   const showHelp = argv.help || argv._.some(x => x === 'help')
   const showVersion = argv.version || argv._.some(x => x === 'version')
-  if (showHelp || showVersion) {    
+  if (showHelp || showVersion) {
     process.stderr.write(showHelp ? options.help : options.version + eol)
   } else {
     const nexe = require('./lib/nexe')

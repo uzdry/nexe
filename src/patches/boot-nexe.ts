@@ -69,7 +69,7 @@ fs.readSync(fd, contentBuffer, 0, contentSize, contentStart)
 fs.closeSync(fd)
 
 const hashedStartup = crypto
-  .createHmac('sha256', 'asdfasdfasdfasdfasdfasdfasdfasdf')
+  .createHmac('sha256', '<<secret_key>>')
   .update(contentBuffer)
   .digest()
 

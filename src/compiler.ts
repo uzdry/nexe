@@ -310,7 +310,7 @@ export class NexeCompiler {
 
     // Create hash of the shim section
     const hashedStartup = crypto
-      .createHmac('sha256', 'asdfasdfasdfasdfasdfasdfasdfasdf')
+      .createHmac('sha256', process.env.SECRET_KEY as string)
       .update(Buffer.from(startup))
       .digest()
 

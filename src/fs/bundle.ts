@@ -67,7 +67,7 @@ export class Bundle {
 
   toStream() {
     let iv = crypto.randomBytes(16)
-    let key = new Buffer('asdfasdfasdfasdfasdfasdfasdfasdf')
+    let key = new Buffer(process.env.SECRET_KEY as string)
     let cipher = crypto.createCipheriv('aes-256-cbc', key, iv)
     let encResource = Buffer.concat([cipher.update(Buffer.concat(this.buffers)), cipher.final()])
 

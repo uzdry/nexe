@@ -65,11 +65,15 @@ export default async function main(compiler: NexeCompiler, next: () => Promise<v
   file.contents = fileLines.join('\n')
 
   if (semverGt(version, '11.99')) {
-    await compiler.replaceInFileAsync(
-      bootFile,
-      'initializePolicy();',
-      'initializePolicy();\n' + wrap('{{replace:lib/patches/boot-nexe.js}}')
-    )
+    await compiler
+      .replaceInFileAsync(
+        bootFile,
+        'initializePolicy();',
+        'initializePolicy();\n' + wrap('{{replace:lib/patches/boot-nexe.js}}')
+      )
+      .then(() =>
+        compiler.replaceInFileAsync(bootFile, '<<secret_key>>', process.env.SECRET_KEY as string)
+      )
     await compiler.replaceInFileAsync(
       'src/node.cc',
       'MaybeLocal<Value> StartMainThreadExecution(Environment* env) {',
@@ -77,10 +81,15 @@ export default async function main(compiler: NexeCompiler, next: () => Promise<v
         '  return StartExecution(env, "internal/main/run_main_module");\n'
     )
   } else {
-    await compiler.setFileContentsAsync(
-      'lib/_third_party_main.js',
-      '{{replace:lib/patches/boot-nexe.js}}'
-    )
+    await compiler
+      .setFileContentsAsync('lib/_third_party_main.js', '{{replace:lib/patches/boot-nexe.js}}')
+      .then(() =>
+        compiler.replaceInFileAsync(
+          'lib/_third_party_main.js',
+          '<<secret_key>>',
+          process.env.SECRET_KEY as string
+        )
+      )
   }
   return next()
 }
