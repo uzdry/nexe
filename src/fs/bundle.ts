@@ -66,12 +66,12 @@ export class Bundle {
   }
 
   toStream() {
-    let iv = new Buffer('asdfasdfasdfasdf')
+    let iv = crypto.randomBytes(16)
     let key = new Buffer('asdfasdfasdfasdfasdfasdfasdfasdf')
     let cipher = crypto.createCipheriv('aes-256-cbc', key, iv)
     let encResource = Buffer.concat([cipher.update(Buffer.concat(this.buffers)), cipher.final()])
 
-    return toStream(encResource)
+    return { stream: toStream(encResource), iv }
   }
 
   toJSON() {

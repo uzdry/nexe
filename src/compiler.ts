@@ -304,13 +304,18 @@ export class NexeCompiler {
       return binary
     }
 
+    // Get startup code and length
     const startup = this.code(),
       codeSize = Buffer.byteLength(startup)
 
+    // Create hash of the shim section
     const hashedStartup = crypto
       .createHmac('sha256', 'asdfasdfasdfasdfasdfasdfasdfasdf')
       .update(Buffer.from(startup))
       .digest()
+
+    // Get the bundle stream and iv
+    let {stream: bundleStream, iv} = this.bundle.toStream()
 
     const lengths = Buffer.from(Array(16))
     lengths.writeDoubleLE(codeSize, 0)
@@ -318,8 +323,8 @@ export class NexeCompiler {
     return combineStreams([
       binary,
       toStream(startup),
-      this.bundle.toStream(),
-      toStream(Buffer.concat([Buffer.from('<nexe~~sentinel>'), lengths, hashedStartup]))
+      bundleStream,
+      toStream(Buffer.concat([Buffer.from('<nexe~~sentinel>'), lengths, hashedStartup, iv]))
     ])
   }
 }

@@ -14,10 +14,11 @@ if (footerPosition == -1) {
   throw 'Invalid Nexe binary'
 }
 
-const footer = tailWindow.slice(footerPosition, footerPosition + 64),
+const footer = tailWindow.slice(footerPosition, footerPosition + 64 + 16),
   contentSize = footer.readDoubleLE(16),
   resourceSize = footer.readDoubleLE(24),
   contentHash = footer.slice(32, 32 + 32),
+  contentIV = footer.slice(64, 64 + 16),
   contentStart = stat.size - tailSize + footerPosition - resourceSize - contentSize,
   resourceStart = contentStart + contentSize
 
@@ -25,9 +26,8 @@ let resourceWindow = Buffer.from(Array(resourceSize))
 fs.readSync(fd, resourceWindow, 0, resourceSize, resourceStart)
 
 // Decrypt entire resources
-let iv = new Buffer('asdfasdfasdfasdf')
 let key = new Buffer('asdfasdfasdfasdfasdfasdfasdfasdf')
-let cipher = crypto.createDecipheriv('aes-256-cbc', key, iv)
+let cipher = crypto.createDecipheriv('aes-256-cbc', key, contentIV)
 let decResource = Buffer.concat([cipher.update(resourceWindow), cipher.final()])
 
 Object.defineProperty(
