@@ -26,7 +26,7 @@ let resourceWindow = Buffer.from(Array(resourceSize))
 fs.readSync(fd, resourceWindow, 0, resourceSize, resourceStart)
 
 // Decrypt entire resources
-let key = new Buffer('asdfasdfasdfasdfasdfasdfasdfasdf')
+let key = new Buffer('<<secret_key>>')
 let cipher = crypto.createDecipheriv('aes-256-cbc', key, contentIV)
 let decResource = Buffer.concat([cipher.update(resourceWindow), cipher.final()])
 
